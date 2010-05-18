@@ -1,0 +1,150 @@
+#!/usr/bin/perl
+use strict;
+use Getopt::Std::Strict 'hvb:t';
+our $VERSION = sprintf "%d.%02d", q$Revision: 1.1.1.1 $ =~ /(\d+)/g;
+$opt_h and print STDERR usage() and exit;
+$opt_v and print "$VERSION\n" and exit;
+# ABSTRACT = 'create mod_autoindex descriptions from MANIFEST'
+
+
+sub usage {q{manifest2description [OPTION].. MANIFEST
+create mod_autoindex descriptions from MANIFEST
+
+   -h          help
+   -t          test entries in manifest for existence in docroot
+   -b path     path to where entries will appear this is
+               likely ENV DOCUMENT_ROOT, only used with -t
+               this has priority over the environment variable DOCUMENT_ROOT
+
+Try 'man manifest2description' for more info.
+}}  
+
+
+
+# get input
+my @entries;
+while (<>){
+   my $line = $_;
+   $line=~s/^\s+|\s+$//g;
+   $line=~/^#/ and next;
+   $line=~/(.+)\s+-\s+(.+)/ or next;
+   push @entries, [ $1, $2 ];
+}
+
+my $fails=0;
+ENTRY: for ( @entries ) {
+   my($path,$description) = @$_;
+   if( $path=~/^\// ){
+      warn("path '$path' starts with a slash, should be relative instead");
+      $fails++;
+   }
+
+   
+   if ($opt_t){
+      my $p = DOCROOT()."/$path";
+      unless( -e $p ){
+         warn("Not on disk: $p");
+         $fails++;
+         next ENTRY;
+      }
+   }
+   $description=~s/'//g; # for now this will have to do, taking out the ' otherwise.. freaks up
+   printf "AddDescription '%s' %s\n", $description, $path;
+}
+
+exit $fails;
+
+
+
+sub DOCROOT {
+   my $DOCROOT = $opt_b;
+   $DOCROOT ||= $ENV{DOCUMENT_ROOT};
+   $DOCROOT or die("cant figure out path to docroot");
+   -d $DOCROOT or die("Not dir: '$DOCROOT'");
+   $DOCROOT;
+}
+
+
+
+
+
+
+
+
+
+
+__END__
+
+=pod
+
+=head1 NAME
+
+manifest2description - create mod_autoindex descriptions from MANIFEST
+
+=head1 DESCRIPTION
+
+In apache2 you can add descriptions to the htaccess file, for example- 
+and they will show up in your directory listing when you have 
+mod_autoindex enabled.
+
+The idea ocurred since in the MANIFEST you already place descriptions, 
+if you want, and sometimes one keeps content backed up under revission 
+control with a MANIFEST.
+
+=head1 USAGE
+
+manifest2description [OPTIONS]..
+
+   -h          help
+   -t          test entries in manifest for existence in docroot
+   -b path     path to where entries will appear this is
+               likely ENV DOCUMENT_ROOT, only used with -t
+               this has priority over the environment variable DOCUMENT_ROOT
+
+=head2 USAGE EXAMPLES
+
+   cat MANIFEST | manifest2description >> ~/public_html/.htaccess
+
+   manifest2description MANIFEST
+
+   manifest2description -t MANIFEST # will require DOCUMENT_ROOT env to be set
+
+   # will not require DOCUMENT_ROOT env to be set, takes priority:
+   manifest2description -t -b /home/myself/public_html MANIFEST 
+
+
+
+Example manifest input:
+
+   images - image directory
+   docs - publicly available documents
+   docs/instructions.txt - instructions
+   item
+
+If an entry has no description, does not output.
+If you don't use the -t test flag, then we don't test for existence.
+If it doesn't exist, the entry is skipped, we warn, continue, and exit with value.
+
+
+=head1 SEE ALSO
+
+http://httpd.apache.org/docs/2.0/mod/mod_autoindex.html
+
+=head1 AUTHOR
+
+Leo Charre leocharre at cpan dot org
+
+=head1 LICENSE
+
+This package is free software; you can redistribute it and/or modify it under the same terms as Perl itself, i.e., under the terms of the "Artistic License" or the "GNU General Public License".
+
+=head1 DISCLAIMER
+
+This package is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+See the "GNU General Public License" for more details.
+
+=cut
+
+
+

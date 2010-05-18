@@ -1,0 +1,80 @@
+
+================================================================================
+
+manifest2description - create mod_autoindex descriptions from MANIFEST
+
+DESCRIPTION
+    In apache2 you can add descriptions to the htaccess file, for example-
+    and they will show up in your directory listing when you have
+    mod_autoindex enabled.
+
+    The idea ocurred since in the MANIFEST you already place descriptions,
+    if you want, and sometimes one keeps content backed up under revission
+    control with a MANIFEST.
+
+USAGE
+    manifest2description [OPTIONS]..
+
+       -h          help
+       -t          test entries in manifest for existence in docroot
+       -b path     path to where entries will appear this is
+                   likely ENV DOCUMENT_ROOT, only used with -t
+                   this has priority over the environment variable DOCUMENT_ROOT
+
+  USAGE EXAMPLES
+       cat MANIFEST | manifest2description >> ~/public_html/.htaccess
+
+       manifest2description MANIFEST
+
+       manifest2description -t MANIFEST # will require DOCUMENT_ROOT env to be set
+
+       # will not require DOCUMENT_ROOT env to be set, takes priority:
+       manifest2description -t -b /home/myself/public_html MANIFEST 
+
+    Example manifest input:
+
+       images - image directory
+       docs - publicly available documents
+       docs/instructions.txt - instructions
+       item
+
+    If an entry has no description, does not output. If you don't use the -t
+    test flag, then we don't test for existence. If it doesn't exist, the
+    entry is skipped, we warn, continue, and exit with value.
+
+SEE ALSO
+    http://httpd.apache.org/docs/2.0/mod/mod_autoindex.html
+
+AUTHOR
+    Leo Charre leocharre at cpan dot org
+
+LICENSE
+    This package is free software; you can redistribute it and/or modify it
+    under the same terms as Perl itself, i.e., under the terms of the
+    "Artistic License" or the "GNU General Public License".
+
+DISCLAIMER
+    This package is distributed in the hope that it will be useful, but
+    WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+    See the "GNU General Public License" for more details.
+
+
+--------------------------------------------------------------------------------
+
+
+
+REQUIRES
+
+Getopt::Std::Strict: 1.01
+Test::Simple: 0
+
+
+INSTALL
+
+   perl Makefile.PL
+   make install
+
+
+

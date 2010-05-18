@@ -1,0 +1,8 @@
+MANIFEST
+Makefile.PL
+README
+bin/manifest2description
+t/00.t
+t/MANIFEST.example
+t/MANIFEST.witherrors
+META.yml                                 Module meta-data (added by MakeMaker)
